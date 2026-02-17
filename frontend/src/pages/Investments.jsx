@@ -100,7 +100,6 @@ export default function Investments() {
         setUnits("");
         setPrice("");
         await loadInvestments();
-        await refreshPrices();
       }
     } catch (err) {
       console.error(err);
