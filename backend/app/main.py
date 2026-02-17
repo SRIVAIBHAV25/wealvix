@@ -402,8 +402,8 @@ def refresh_portfolio_prices(
     user: User = Depends(get_current_user)
 ):
     updated_count = MarketDataService.update_investment_prices(db, user.id)
-if updated_count == 0:
-    return {"status": "warning", "updated": 0, "message": "No prices updated. Symbols may be invalid or Yahoo Finance is temporarily unavailable."}
+    if updated_count == 0:
+        return {"status": "warning", "updated": 0, "message": "No prices updated. Symbols may be invalid or Yahoo Finance is temporarily unavailable."}
     return {"status": "success", "updated": updated_count}
 
 # ---------- RECOMMENDATIONS ROUTES ----------
