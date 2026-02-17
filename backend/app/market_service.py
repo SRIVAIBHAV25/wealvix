@@ -12,26 +12,21 @@ class MarketDataService:
     @staticmethod
     def get_current_price(symbol: str) -> Optional[float]:
         try:
-            # normalize symbol
             symbol = symbol.strip().upper()
 
-            # try US first, fallback to NSE
-            if "." not in symbol:
-                test = yf.Ticker(symbol).history(period="5d")
-                if test.empty:
-                    symbol = f"{symbol}.NS"
+            # Try symbol as-is first
+            data = yf.Ticker(symbol).history(period="5d")
 
-            ticker = yf.Ticker(symbol)
-
-            # use 5 days (more reliable on servers)
-            data = ticker.history(period="5d")
+            # If empty and no suffix, fallback to NSE
+            if data.empty and "." not in symbol:
+                symbol = f"{symbol}.NS"
+                data = yf.Ticker(symbol).history(period="5d")
 
             if data.empty:
                 logger.error(f"Yahoo returned empty data for {symbol}")
                 return None
 
             close_prices = data["Close"].dropna()
-
             if close_prices.empty:
                 logger.error(f"No close prices for {symbol}")
                 return None
@@ -46,25 +41,35 @@ class MarketDataService:
     def get_multiple_prices(symbols: List[str]) -> Dict[str, float]:
         prices = {}
         for symbol in symbols:
-            price = MarketDataService.get_current_price(symbol)
+            normalized = symbol.strip().upper()
+            price = MarketDataService.get_current_price(normalized)
             if price is not None:
-                prices[symbol] = price
+                prices[normalized] = price  # key matches what DB stores
         return prices
 
     @staticmethod
     def get_market_data(symbol: str) -> Optional[Dict]:
         try:
+            symbol = symbol.strip().upper()
+
             ticker = yf.Ticker(symbol)
-            info = ticker.info
             history = ticker.history(period="5d")
+
+            # Fallback to NSE if empty
+            if history.empty and "." not in symbol:
+                symbol = f"{symbol}.NS"
+                ticker = yf.Ticker(symbol)
+                history = ticker.history(period="5d")
 
             if history.empty:
                 return None
 
-            current_price = float(history["Close"].iloc[-1])
+            info = ticker.info
+
+            current_price = float(history["Close"].dropna().iloc[-1])
             previous_close = (
-                float(history["Close"].iloc[-2])
-                if len(history) > 1
+                float(history["Close"].dropna().iloc[-2])
+                if len(history["Close"].dropna()) > 1
                 else current_price
             )
 
@@ -79,9 +84,7 @@ class MarketDataService:
                 "change": change,
                 "change_percent": change_percent,
                 "last_updated": datetime.utcnow(),
-                "volume": int(history["Volume"].iloc[-1])
-                if "Volume" in history
-                else 0,
+                "volume": int(history["Volume"].iloc[-1]) if "Volume" in history else 0,
                 "market_cap": info.get("marketCap", 0),
                 "pe_ratio": info.get("trailingPE", 0),
             }
@@ -100,17 +103,21 @@ class MarketDataService:
 
         investments = query.all()
 
-        symbols = list(set([inv.symbol for inv in investments]))
+        # Normalize all symbols before fetching
+        symbols = list(set([inv.symbol.strip().upper() for inv in investments]))
         prices = MarketDataService.get_multiple_prices(symbols)
 
         updated_count = 0
         for investment in investments:
-            if investment.symbol in prices:
-                new_price = prices[investment.symbol]
+            key = investment.symbol.strip().upper()  # normalize to match prices dict
+            if key in prices:
+                new_price = prices[key]
                 investment.last_price = new_price
                 investment.current_value = investment.units * new_price
                 investment.last_price_at = datetime.utcnow()
                 updated_count += 1
+            else:
+                logger.warning(f"No price found for symbol: {investment.symbol}")
 
         db.commit()
         return updated_count
