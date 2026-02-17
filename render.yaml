@@ -18,8 +18,6 @@ services:
         value: HS256
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
         value: "30"
-      - key: ALPHA_VANTAGE_API_KEY
-        sync: false
       - key: FRONTEND_URL
         sync: false
 
