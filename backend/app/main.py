@@ -54,12 +54,11 @@ app = FastAPI(title="Wealth Management API", version="2.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        os.getenv("FRONTEND_URL", "http://localhost:5173"),
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        # Render preview URLs — allows all *.onrender.com subdomains
-        "https://*.onrender.com",
-    ],
+    "https://wealth-frontend-31d9.onrender.com",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://*.onrender.com",
+],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
