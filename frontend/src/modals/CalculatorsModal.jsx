@@ -38,7 +38,7 @@ export default function CalculatorsModal({ open, onClose }) {
   const calculateSIP = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API}/calculators/sip`, {
+      const res = await fetch(`${API_BASE}/calculators/sip`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
