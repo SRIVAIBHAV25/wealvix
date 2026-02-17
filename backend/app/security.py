@@ -12,12 +12,10 @@ pwd_context = CryptContext(
 )
 
 def hash_password(password: str) -> str:
-    password_bytes = password.encode("utf-8")[:72]
-    return pwd_context.hash(password_bytes)
+    return pwd_context.hash(password)
 
 def verify_password(plain: str, hashed: str) -> bool:
-    plain_bytes = plain.encode("utf-8")[:72]
-    return pwd_context.verify(plain_bytes, hashed)
+    return pwd_context.verify(plain, hashed)
 
 # =========================
 # JWT
