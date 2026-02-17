@@ -25,7 +25,7 @@ from app.schemas import (
     MarketDataOut
 )
 from app.security import hash_password, verify_password, create_access_token
-from app.alpha_vantage_service import AlphaVantageService
+from app.market_service import MarketDataService
 from app.recommendation_engine import RecommendationEngine
 from app.simulation_engine import SimulationEngine
 from app.calculators import FinancialCalculators
@@ -296,7 +296,7 @@ def create_investment(
 
     # Auto-fetch live price immediately after adding
     try:
-        price = AlphaVantageService.get_current_price(inv.symbol)
+        price = MarketDataService.get_current_price(inv.symbol)
         if price:
             inv.last_price = price
             inv.current_value = inv.units * price
@@ -391,7 +391,7 @@ def delete_transaction(
 # ---------- MARKET DATA ROUTES ----------
 @app.get("/market/{symbol}")
 def get_market_data(symbol: str):
-    data = AlphaVantageService.get_market_data(symbol)
+    data = MarketDataService.get_market_data(symbol)
     if not data:
         raise HTTPException(status_code=404, detail="Market data not available")
     return data
@@ -401,9 +401,9 @@ def refresh_portfolio_prices(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user)
 ):
-    updated_count = AlphaVantageService.update_investment_prices(db, user.id)
-    if updated_count == 0:
-        return {"status": "warning", "updated": 0, "message": "No prices updated. Check ALPHA_VANTAGE_API_KEY or rate limit."}
+    updated_count = MarketDataService.update_investment_prices(db, user.id)
+if updated_count == 0:
+    return {"status": "warning", "updated": 0, "message": "No prices updated. Symbols may be invalid or Yahoo Finance is temporarily unavailable."}
     return {"status": "success", "updated": updated_count}
 
 # ---------- RECOMMENDATIONS ROUTES ----------
