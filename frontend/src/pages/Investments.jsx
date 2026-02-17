@@ -31,7 +31,7 @@ export default function Investments() {
 
   const loadInvestments = async () => {
     try {
-      const res = await fetch(`${API}/portfolio`, {
+      const res = await fetch(`${API_BASE}/portfolio`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -76,7 +76,7 @@ export default function Investments() {
 
     setLoading(true);
     try {
-      const res = await fetch(`${API}/investments`, {
+      const res = await fetch(`${API_BASE}/investments`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -109,7 +109,7 @@ export default function Investments() {
     if (!confirm("Delete this investment?")) return;
 
     try {
-      await fetch(`${API}/investments/${id}`, {
+      await fetch(`${API_BASE}/investments/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
