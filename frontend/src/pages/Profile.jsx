@@ -92,7 +92,7 @@ export default function Profile() {
   const updateProfile = async () => {
     setSaving(true);
     try {
-      const res = await fetch(`${API}/profile`, {
+      const res = await fetch(`${API_BASE}/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
