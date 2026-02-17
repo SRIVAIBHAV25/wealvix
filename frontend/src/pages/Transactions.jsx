@@ -60,7 +60,7 @@ export default function Transactions() {
 
     setAddingTransaction(true);
     try {
-      const res = await fetch(`${API}/transactions`, {
+      const res = await fetch(`${API_BASE}/transactions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -96,7 +96,7 @@ export default function Transactions() {
     if (!confirm("Delete this transaction?")) return;
 
     try {
-      const res = await fetch(`${API}/transactions/${id}`, {
+      const res = await fetch(`${API_BASE}/transactions/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
