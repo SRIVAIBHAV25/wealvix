@@ -51,9 +51,13 @@ export default function Investments() {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
+        const data = await res.json();
         await loadInvestments();
-        alert("Prices updated successfully!");
-      }
+        if (data.updated === 0) {
+          alert("⚠️ No prices updated.\n\nPossible reasons:\n• ALPHA_VANTAGE_API_KEY not set in Render\n• Rate limit hit (5 calls/min, 25/day on free tier)\n• Invalid stock symbol");
+        } else {
+          alert(`✅ Updated ${data.updated} investment(s) with live prices!`);
+        }
     } catch (err) {
       console.error(err);
       alert("Failed to refresh prices. Please try again.");
@@ -95,7 +99,7 @@ export default function Investments() {
         setUnits("");
         setPrice("");
         await loadInvestments();
-        alert("Investment added! Click 'Refresh Prices' to get latest market price.");
+        await refreshPrices();
       }
     } catch (err) {
       console.error(err);
