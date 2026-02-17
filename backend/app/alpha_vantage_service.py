@@ -11,7 +11,7 @@ class AlphaVantageService:
     """Service for fetching market data from Alpha Vantage"""
     
     # Get your free API key from: https://www.alphavantage.co/support/#api-key
-    API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY", "YOUR_API_KEY_HERE")
+    API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY", "YI95T1UR1S82EUMC2")
     BASE_URL = "https://www.alphavantage.co/query"
     
     @staticmethod
