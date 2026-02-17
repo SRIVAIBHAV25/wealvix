@@ -1,10 +1,5 @@
-# ── Render Blueprint ───────────────────────────────────────────────────────────
-# This file auto-configures all 3 services when you connect this repo to Render.
-# Docs: https://render.com/docs/blueprint-spec
-
 services:
 
-  # ── 1. Backend API (FastAPI) ──────────────────────────────────────────────
   - type: web
     name: wealth-backend
     env: docker
@@ -14,7 +9,7 @@ services:
     healthCheckPath: /health
     envVars:
       - key: DATABASE_URL
-        sync: false          # Set manually in Render dashboard → do not commit secrets
+        sync: false
       - key: REDIS_URL
         sync: false
       - key: SECRET_KEY
@@ -26,20 +21,18 @@ services:
       - key: ALPHA_VANTAGE_API_KEY
         sync: false
       - key: FRONTEND_URL
-        sync: false          # Set to your frontend Render URL after first deploy
+        sync: false
 
-  # ── 2. Frontend (React + Vite → nginx) ───────────────────────────────────
   - type: web
     name: wealth-frontend
     env: docker
     dockerfilePath: ./frontend/Dockerfile
     dockerContext: ./frontend
     plan: free
-    dockerBuildArgs:
+    envVars:
       - key: VITE_API_BASE_URL
-        sync: false          # Set to your backend Render URL in dashboard
+        sync: false
 
-  # ── 3. Celery Worker (background tasks + beat scheduler) ─────────────────
   - type: worker
     name: wealth-celery
     env: docker
