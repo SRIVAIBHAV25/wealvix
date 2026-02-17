@@ -59,7 +59,6 @@ app.add_middleware(
     "https://wealth-frontend-31d9.onrender.com",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://*.onrender.com",
 ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -322,26 +321,6 @@ def delete_investment(
     
     db.delete(investment)
     db.commit()
-
-# ---------- TRANSACTIONS ROUTES ----------
-@app.post("/transactions", response_model=TransactionOut)
-def create_transaction(
-    tx: TransactionCreate,
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
-):
-    transaction = Transaction(
-        user_id=user.id,
-        symbol=tx.symbol,
-        type=tx.type,
-        quantity=tx.quantity,
-        price=tx.price,
-        fees=tx.fees,
-    )
-    db.add(transaction)
-    db.commit()
-    db.refresh(transaction)
-    return transaction
 
 # ---------- TRANSACTIONS ROUTES ----------
 @app.post("/transactions", response_model=TransactionOut)
