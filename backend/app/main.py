@@ -35,7 +35,9 @@ from app.startup import init_db
 # =========================
 # CONFIG
 # =========================
-SECRET_KEY = os.getenv("SECRET_KEY", "super-secret-key-change-in-production")
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY environment variable is not set!")
 ALGORITHM = "HS256"
 
 from contextlib import asynccontextmanager
