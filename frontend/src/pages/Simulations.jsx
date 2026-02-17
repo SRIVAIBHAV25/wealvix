@@ -28,7 +28,7 @@ export default function Simulations() {
   const runGoalSimulation = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API}/simulations`, {
+      const res = await fetch(`${API_BASE}/simulations`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -88,7 +88,7 @@ export default function Simulations() {
   const runWhatIfContributions = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API}/simulations/what-if/contributions`, {
+      const res = await fetch(`${API_BASE}/simulations/what-if/contributions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -117,7 +117,7 @@ export default function Simulations() {
   const runMonteCarlo = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API}/simulations/monte-carlo`, {
+      const res = await fetch(`${API_BASE}/simulations/monte-carlo`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
