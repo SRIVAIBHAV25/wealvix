@@ -15,7 +15,7 @@ from app.models import (
     RiskProfile, GoalType, AssetType, TransactionType
 )
 from app.schemas import (
-    UserCreate, UserLogin, UserOut, UserProfileUpdate,
+    UserCreate, UserLogin, UserOut, UserProfileUpdate, PasswordChange,
     GoalCreate, GoalUpdate, GoalOut,
     InvestmentCreate, InvestmentOut,
     TransactionCreate, TransactionOut,
@@ -176,7 +176,19 @@ def update_profile(
     db.commit()
     db.refresh(user)
     return user
-
+@app.post("/profile/change-password")
+def change_password(
+    data: PasswordChange,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user)
+):
+    if not verify_password(data.current_password, user.password):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    if len(data.new_password) < 6:
+        raise HTTPException(status_code=400, detail="New password must be at least 6 characters")
+    user.password = hash_password(data.new_password)
+    db.commit()
+    return {"message": "Password changed successfully"}
 # ---------- GOALS ROUTES ----------
 @app.post("/goals", response_model=GoalOut)
 def create_goal(
