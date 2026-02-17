@@ -52,7 +52,7 @@ export default function Dashboard() {
   const refreshPrices = async () => {
     setRefreshing(true);
     try {
-      await fetch(`${API}/portfolio/refresh-prices`, {
+      await fetch(`${API_BASE}/portfolio/refresh-prices`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });
