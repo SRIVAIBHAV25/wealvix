@@ -54,7 +54,7 @@ export default function Investments() {
         const data = await res.json();
         await loadInvestments();
         if (data.updated === 0) {
-          alert("⚠️ No prices updated.\n\nPossible reasons:\n• ALPHA_VANTAGE_API_KEY not set in Render\n• Rate limit hit (5 calls/min, 25/day on free tier)\n• Invalid stock symbol");
+        alert("⚠️ No prices updated.\n\nPossible reasons:\n• Invalid stock symbol\n• Yahoo Finance temporarily unavailable\n• No investments found for your account");
         } else {
           alert(`✅ Updated ${data.updated} investment(s) with live prices!`);
         }
