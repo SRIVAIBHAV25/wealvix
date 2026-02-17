@@ -74,7 +74,7 @@ export default function InvestmentSimulations() {
     setLoading(true);
     setResults(null);
     try {
-      const res = await fetch(`${API}/investments/minimum-for-target`, {
+      const res = await fetch(`${API_BASE}/investments/minimum-for-target`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
