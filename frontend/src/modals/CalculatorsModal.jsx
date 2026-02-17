@@ -81,7 +81,7 @@ export default function CalculatorsModal({ open, onClose }) {
   const calculateLoan = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API}/calculators/loan`, {
+      const res = await fetch(`${API_BASE}/calculators/loan`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
