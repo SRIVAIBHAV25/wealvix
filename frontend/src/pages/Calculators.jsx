@@ -60,7 +60,7 @@ export default function Calculators() {
   const calculateRetirement = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API}/calculators/retirement`, {
+      const res = await fetch(`${API_BASE}/calculators/retirement`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -86,7 +86,7 @@ export default function Calculators() {
   const calculateLoan = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API}/calculators/loan`, {
+      const res = await fetch(`${API_BASE}/calculators/loan`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
