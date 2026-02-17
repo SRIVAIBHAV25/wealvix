@@ -147,7 +147,7 @@ export default function Investments() {
             Realtime Investments
           </Typography>
           <Typography variant="body1" sx={{ color: '#94a3b8' }}>
-            Add investments and get live market prices from Alpha Vantage API
+            Add investments and get live market prices from Yahoo Finance
           </Typography>
         </Box>
         <Button
@@ -294,7 +294,7 @@ export default function Investments() {
                   No investments yet. Add your first investment!
                 </Typography>
                 <Typography variant="caption" sx={{ color: '#64748b' }}>
-                  After adding, click "Refresh Prices" to get live market data from Alpha Vantage
+                 After adding, click "Refresh Prices" to get live market data from Yahoo Finance
                 </Typography>
               </Box>
             ) : (
