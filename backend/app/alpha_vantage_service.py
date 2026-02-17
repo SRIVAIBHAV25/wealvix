@@ -11,12 +11,16 @@ class AlphaVantageService:
     """Service for fetching market data from Alpha Vantage"""
     
     # Get your free API key from: https://www.alphavantage.co/support/#api-key
-    API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY", "YI95T1UR1S82EUMC2")
+    API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")
     BASE_URL = "https://www.alphavantage.co/query"
     
     @staticmethod
     def get_current_price(symbol: str) -> Optional[float]:
         """Get current price for a symbol"""
+        if not AlphaVantageService.API_KEY:
+            logger.error("ALPHA_VANTAGE_API_KEY is not set")
+            return None
+
         try:
             params = {
                 'function': 'GLOBAL_QUOTE',
@@ -40,7 +44,12 @@ class AlphaVantageService:
     
     @staticmethod
     def get_multiple_prices(symbols: List[str]) -> Dict[str, float]:
-        """Get prices for multiple symbols (with rate limiting)"""
+        """Get prices for multiple symbols (with rate limiting).
+        
+        Alpha Vantage free tier allows 5 requests/minute (25/day).
+        This method is intended to be called from a background Celery task,
+        NOT from a live API request — it blocks for ~12s per symbol.
+        """
         prices = {}
         
         for i, symbol in enumerate(symbols):
@@ -48,8 +57,8 @@ class AlphaVantageService:
             if price:
                 prices[symbol] = price
             
-            # Alpha Vantage free tier: 5 requests/minute
-            # Add delay between requests
+            # Wait between requests to respect the 5 req/min rate limit.
+            # Only sleep if there are more symbols to fetch.
             if i < len(symbols) - 1:
                 time.sleep(12)  # 12 seconds between requests
         
@@ -58,6 +67,10 @@ class AlphaVantageService:
     @staticmethod
     def get_market_data(symbol: str) -> Optional[Dict]:
         """Get detailed market data"""
+        if not AlphaVantageService.API_KEY:
+            logger.error("ALPHA_VANTAGE_API_KEY is not set")
+            return None
+
         try:
             params = {
                 'function': 'GLOBAL_QUOTE',
@@ -92,7 +105,12 @@ class AlphaVantageService:
     
     @staticmethod
     def update_investment_prices(db, user_id: int = None):
-        """Update prices for all investments"""
+        """Update prices for all investments.
+        
+        ⚠️  This method calls get_multiple_prices() which sleeps 12s per symbol.
+        Always call this from a background Celery task, never from a live request.
+        Use the /portfolio/refresh-prices endpoint only for manual user-triggered refreshes.
+        """
         from app.models import Investment
         
         query = db.query(Investment)
