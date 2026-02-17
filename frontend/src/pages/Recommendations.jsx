@@ -37,7 +37,7 @@ export default function Recommendations() {
 
   const loadAllocationRecommendation = async () => {
     try {
-      const res = await fetch(`${API}/recommendations/allocation`, {
+      const res = await fetch(`${API_BASE}/recommendations/allocation`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -52,7 +52,7 @@ export default function Recommendations() {
   const generateRecommendations = async () => {
     setGenerating(true);
     try {
-      await fetch(`${API}/recommendations/generate`, {
+      await fetch(`${API_BASE}/recommendations/generate`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -70,7 +70,7 @@ export default function Recommendations() {
     
     try {
       // Clear recommendations on backend
-      const res = await fetch(`${API}/recommendations/clear`, {
+      const res = await fetch(`${API_BASE}/recommendations/clear`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
