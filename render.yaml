@@ -32,17 +32,3 @@ services:
     envVars:
       - key: VITE_API_BASE_URL
         sync: false
-
-  - type: worker
-    name: wealth-celery
-    env: docker
-    dockerfilePath: ./backend/Dockerfile.celery
-    dockerContext: ./backend
-    plan: free
-    envVars:
-      - key: DATABASE_URL
-        sync: false
-      - key: REDIS_URL
-        sync: false
-      - key: ALPHA_VANTAGE_API_KEY
-        sync: false
