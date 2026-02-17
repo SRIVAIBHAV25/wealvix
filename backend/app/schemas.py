@@ -136,6 +136,7 @@ class TransactionCreate(BaseModel):
     quantity: float
     price: float
     fees: Optional[float] = 0
+    executed_at: Optional[datetime] = None
 
 
 class TransactionOut(BaseModel):
