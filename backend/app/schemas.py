@@ -75,6 +75,11 @@ class UserProfileUpdate(BaseModel):
     kyc_status: Optional[KYCStatusEnum] = None
 
 
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str
+
+
 # Goal Schemas
 class GoalCreate(BaseModel):
     title: str
