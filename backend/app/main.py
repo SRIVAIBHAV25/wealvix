@@ -293,7 +293,19 @@ def create_investment(
         print(f"❌ Error creating transaction: {e}")  # Debug log
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Failed to create transaction: {str(e)}")
-    
+
+    # Auto-fetch live price immediately after adding
+    try:
+        price = AlphaVantageService.get_current_price(inv.symbol)
+        if price:
+            inv.last_price = price
+            inv.current_value = inv.units * price
+            inv.last_price_at = datetime.utcnow()
+            db.commit()
+            db.refresh(inv)
+    except Exception:
+        pass  # Don't fail if price fetch fails
+
     return inv
 
 @app.get("/portfolio", response_model=List[InvestmentOut])
@@ -390,13 +402,15 @@ def refresh_portfolio_prices(
     user: User = Depends(get_current_user)
 ):
     updated_count = AlphaVantageService.update_investment_prices(db, user.id)
+    if updated_count == 0:
+        return {"status": "warning", "updated": 0, "message": "No prices updated. Check ALPHA_VANTAGE_API_KEY or rate limit."}
     return {"status": "success", "updated": updated_count}
 
 # ---------- RECOMMENDATIONS ROUTES ----------
 @app.get("/recommendations", response_model=List[RecommendationOut])
 def get_recommendations(
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(get_current_user)    
 ):
     return db.query(Recommendation).filter(
         Recommendation.user_id == user.id
