@@ -22,7 +22,9 @@ def verify_password(plain: str, hashed: str) -> bool:
 # JWT
 # =========================
 
-SECRET_KEY = os.getenv("SECRET_KEY", "super-secret-key-change-later")
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY environment variable is not set!")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
