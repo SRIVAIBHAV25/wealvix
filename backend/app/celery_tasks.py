@@ -40,11 +40,11 @@ def update_all_investment_prices():
     """Task to update all investment prices"""
     try:
         from app.database import SessionLocal
-        from app.alpha_vantage_service import AlphaVantageService
+        from app.market_service import MarketDataService
 
         db = SessionLocal()
         try:
-            updated_count = AlphaVantageService.update_investment_prices(db)
+            updated_count = MarketDataService.update_investment_prices(db)
             logger.info(f"Updated {updated_count} investments")
             return {"status": "success", "updated": updated_count}
         finally:
@@ -60,11 +60,11 @@ def update_user_investment_prices(user_id: int):
     """Task to update investment prices for a specific user"""
     try:
         from app.database import SessionLocal
-        from app.alpha_vantage_service import AlphaVantageService
+        from app.market_service import MarketDataService
 
         db = SessionLocal()
         try:
-            updated_count = AlphaVantageService.update_investment_prices(
+            updated_count = MarketDataService.update_investment_prices(db, user_id=user_id)
                 db, user_id=user_id
             )
             logger.info(f"Updated {updated_count} investments for user {user_id}")
