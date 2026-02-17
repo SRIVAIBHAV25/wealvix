@@ -22,8 +22,8 @@ export default function RecommendationsModal({ open, onClose }) {
   const loadData = async () => {
     try {
       const [recRes, allocRes] = await Promise.all([
-        fetch(`${API}/recommendations`, { headers: { Authorization: `Bearer ${token}` } }),
-        fetch(`${API}/recommendations/allocation`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API_BASE}/recommendations`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API_BASE}/recommendations/allocation`, { headers: { Authorization: `Bearer ${token}` } }),
       ]);
       if (recRes.ok) setRecommendations(await recRes.json());
       if (allocRes.ok) setAllocation(await allocRes.json());
