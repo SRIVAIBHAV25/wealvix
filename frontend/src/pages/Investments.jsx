@@ -58,6 +58,7 @@ export default function Investments() {
         } else {
           alert(`✅ Updated ${data.updated} investment(s) with live prices!`);
         }
+      }
     } catch (err) {
       console.error(err);
       alert("Failed to refresh prices. Please try again.");
