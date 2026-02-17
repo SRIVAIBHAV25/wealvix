@@ -1,3 +1,4 @@
+import os
 from passlib.context import CryptContext
 from jose import jwt
 from datetime import timedelta, datetime
@@ -21,7 +22,7 @@ def verify_password(plain: str, hashed: str) -> bool:
 # JWT
 # =========================
 
-SECRET_KEY = "super-secret-key-change-later"
+SECRET_KEY = os.getenv("SECRET_KEY", "super-secret-key-change-later")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
