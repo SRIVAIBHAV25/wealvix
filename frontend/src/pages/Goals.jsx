@@ -203,7 +203,7 @@ export default function Goals() {
 
       console.log("Sending payload:", payload); // Debug log
 
-      const response = await fetch(`${API}/goals`, {
+      const response = await fetch(`${API_BASE}/goals`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -240,7 +240,7 @@ export default function Goals() {
     if (!confirm("Delete this goal?")) return;
 
     try {
-      await fetch(`${API}/goals/${id}`, {
+      await fetch(`${API_BASE}/goals/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -256,7 +256,7 @@ export default function Goals() {
 
   setLoading(true);
   try {
-    const response = await fetch(`${API}/goals/${goalId}`, {
+    const response = await fetch(`${API_BASE}/goals/${goalId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
