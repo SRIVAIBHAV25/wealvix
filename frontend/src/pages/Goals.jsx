@@ -847,7 +847,7 @@ export default function Goals() {
 
                           <Grid item xs={6}>
                             <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "100%" }}>
-                              <Box sx={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                              <Box sx={{ position: "relative", width: 150, height: 150 }}>
                                 <PieChart
                                   series={[{
                                     data: goalPieData,
@@ -866,14 +866,17 @@ export default function Goals() {
                                 <Box
                                   sx={{
                                     position: "absolute",
+                                    top: "50%",
+                                    left: "50%",
+                                    transform: "translate(-50%, -50%)",
                                     textAlign: "center",
                                     pointerEvents: "none",
                                   }}
                                 >
-                                  <Typography variant="caption" sx={{ color: "#94a3b8", fontSize: "0.6rem", display: "block" }}>
+                                  <Typography sx={{ color: "#94a3b8", fontSize: "0.6rem", display: "block", lineHeight: 1.2 }}>
                                     done
                                   </Typography>
-                                  <Typography variant="body2" fontWeight={700} sx={{ color: "#10b981", fontSize: "0.8rem" }}>
+                                  <Typography fontWeight={700} sx={{ color: "#10b981", fontSize: "0.85rem", lineHeight: 1.2 }}>
                                     {progress.toFixed(0)}%
                                   </Typography>
                                 </Box>
