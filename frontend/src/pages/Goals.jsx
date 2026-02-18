@@ -589,8 +589,9 @@ export default function Goals() {
                 <Typography variant="h6" fontWeight={600} sx={{ mb: 2, color: "white" }}>
                   Overall Progress
                 </Typography>
+                {/* Donut with true centered label using margin=0 so center = width/2, height/2 */}
                 <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                  <Box sx={{ position: "relative", width: 260, height: 220 }}>
+                  <Box sx={{ position: "relative", width: 200, height: 200 }}>
                     <PieChart
                       series={[{
                         data: progressChartData,
@@ -598,21 +599,20 @@ export default function Goals() {
                         outerRadius: 85,
                         paddingAngle: 5,
                         cornerRadius: 6,
-                        cx: 130,
-                        cy: 110,
                         highlightScope: { faded: "global", highlighted: "item" },
                       }]}
-                      width={260}
-                      height={220}
+                      width={200}
+                      height={200}
+                      margin={{ top: 0, bottom: 0, left: 0, right: 0 }}
                       colors={["#10b981", "#1e293b"]}
                       slots={{ legend: () => null }}
                     />
-                    {/* Center label pinned exactly on donut center (cx=130, cy=110) */}
+                    {/* With margin=0, MUI places donut center at exactly width/2=100, height/2=100 */}
                     <Box
                       sx={{
                         position: "absolute",
-                        top: 110,
-                        left: 130,
+                        top: "50%",
+                        left: "50%",
                         transform: "translate(-50%, -50%)",
                         textAlign: "center",
                         pointerEvents: "none",
@@ -627,14 +627,14 @@ export default function Goals() {
                     </Box>
                   </Box>
                 </Box>
-                {/* Legend below the chart */}
-                <Box sx={{ display: "flex", justifyContent: "center", gap: 3, mt: 1 }}>
+                {/* Manual legend */}
+                <Box sx={{ display: "flex", justifyContent: "center", gap: 3, mt: 1.5 }}>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
                     <Box sx={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: "#10b981" }} />
                     <Typography sx={{ color: "#94a3b8", fontSize: "0.8rem" }}>Saved</Typography>
                   </Box>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
-                    <Box sx={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: "#1e293b", border: "1px solid #475569" }} />
+                    <Box sx={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: "#334155", border: "1px solid #475569" }} />
                     <Typography sx={{ color: "#94a3b8", fontSize: "0.8rem" }}>Remaining</Typography>
                   </Box>
                 </Box>
