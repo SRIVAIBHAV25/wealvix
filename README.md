@@ -1,6 +1,7 @@
 # Wealvix — Wealth Management App
 
 A full-stack wealth management platform with portfolio tracking, investment simulations, financial calculators, AI-powered recommendations, and PDF report generation.
+web url - https://wealth-frontend-31d9.onrender.com
 
 ---
 
