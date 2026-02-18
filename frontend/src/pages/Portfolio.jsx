@@ -4,12 +4,17 @@ import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import { PieChart } from '@mui/x-charts/PieChart';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 export default function Portfolio() {
   const [investments, setInvestments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const theme = useTheme();
+const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+const chartWidth = isMobile ? 280 : 420;
 
   const token = localStorage.getItem('token');
   
@@ -65,17 +70,26 @@ export default function Portfolio() {
   const gainPercent = totalInvestment > 0 ? (totalGain / totalInvestment) * 100 : 0;
 
   const assetAllocationData = investments.length > 0
-    ? investments.map((inv, idx) => ({
-        id: idx,
-        value: inv.current_value,
-        label: inv.symbol,
-      }))
-    : [];
+  ? investments.map((inv, idx) => ({
+      id: idx,
+      value: Math.max(0, inv.current_value),
+      label: inv.symbol,
+    })).filter(d => d.value > 0)
+  : [];
 
-  const performanceData = totalInvestment > 0 ? [
-    { id: 0, value: totalInvestment, label: 'Invested', color: '#3b82f6' },
-    { id: 1, value: Math.max(0, totalGain), label: 'Gains', color: '#10b981' },
-  ] : [];
+  const performanceData = totalInvestment > 0 ? (() => {
+  if (totalGain >= 0) {
+    return [
+      { id: 0, value: totalInvestment, label: 'Invested' },
+      ...(totalGain > 0 ? [{ id: 1, value: totalGain, label: 'Gains' }] : []),
+    ];
+  } else {
+    return [
+      { id: 0, value: totalValue, label: 'Current Value' },
+      { id: 1, value: Math.abs(totalGain), label: 'Loss' },
+    ];
+  }
+})() : [];
 
     return (
     <Box sx={{ 
@@ -168,11 +182,17 @@ export default function Portfolio() {
             </Typography>
             {assetAllocationData.length > 0 ? (
               <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                <PieChart
-                  series={[{ data: assetAllocationData }]}
-                  width={450}
-                  height={300}
-                />
+                    <PieChart
+                      series={[{
+                        data: assetAllocationData,
+                        cx: chartWidth / 2 - 10,
+                        cy: 135,
+                        outerRadius: 105,
+                      }]}
+                      width={chartWidth}
+                      height={300}
+                      slotProps={{ legend: { hidden: isMobile } }}
+                    />
               </Box>
             ) : (
               <Box sx={{ textAlign: 'center', py: 8 }}>
@@ -196,11 +216,18 @@ export default function Portfolio() {
             </Typography>
             {performanceData.length > 0 ? (
               <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                <PieChart
-                  series={[{ data: performanceData }]}
-                  width={450}
-                  height={300}
-                />
+                    <PieChart
+                      series={[{
+                        data: performanceData,
+                        cx: chartWidth / 2 - 10,
+                        cy: 135,
+                        outerRadius: 105,
+                        colorScale: totalGain >= 0 ? ['#3b82f6', '#10b981'] : ['#3b82f6', '#ef4444'],
+                      }]}
+                      width={chartWidth}
+                      height={300}
+                      slotProps={{ legend: { hidden: isMobile } }}
+                    />
               </Box>
             ) : (
               <Box sx={{ textAlign: 'center', py: 8 }}>
