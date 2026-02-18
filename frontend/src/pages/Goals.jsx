@@ -590,7 +590,7 @@ export default function Goals() {
                   Overall Progress
                 </Typography>
                 <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                  <Box sx={{ position: "relative", width: 300, height: 220 }}>
+                  <Box sx={{ position: "relative", width: 260, height: 220 }}>
                     <PieChart
                       series={[{
                         data: progressChartData,
@@ -598,38 +598,44 @@ export default function Goals() {
                         outerRadius: 85,
                         paddingAngle: 5,
                         cornerRadius: 6,
-                        cx: 100,
+                        cx: 130,
+                        cy: 110,
                         highlightScope: { faded: "global", highlighted: "item" },
                       }]}
-                      width={300}
+                      width={260}
                       height={220}
                       colors={["#10b981", "#1e293b"]}
-                      slotProps={{
-                        legend: {
-                          direction: "column",
-                          position: { vertical: "middle", horizontal: "right" },
-                          labelStyle: { fill: "#94a3b8", fontSize: 12 },
-                        },
-                      }}
+                      slots={{ legend: () => null }}
                     />
-                    {/* Center label absolutely positioned over the donut hole */}
+                    {/* Center label pinned exactly on donut center (cx=130, cy=110) */}
                     <Box
                       sx={{
                         position: "absolute",
-                        top: "50%",
-                        left: 100,
+                        top: 110,
+                        left: 130,
                         transform: "translate(-50%, -50%)",
                         textAlign: "center",
                         pointerEvents: "none",
                       }}
                     >
-                      <Typography fontWeight={700} sx={{ color: "#10b981", fontSize: "1.5rem", lineHeight: 1.2 }}>
+                      <Typography fontWeight={700} sx={{ color: "#10b981", fontSize: "1.4rem", lineHeight: 1.2 }}>
                         {overallProgress.toFixed(1)}%
                       </Typography>
                       <Typography sx={{ color: "#94a3b8", fontSize: "0.7rem" }}>
                         overall
                       </Typography>
                     </Box>
+                  </Box>
+                </Box>
+                {/* Legend below the chart */}
+                <Box sx={{ display: "flex", justifyContent: "center", gap: 3, mt: 1 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
+                    <Box sx={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: "#10b981" }} />
+                    <Typography sx={{ color: "#94a3b8", fontSize: "0.8rem" }}>Saved</Typography>
+                  </Box>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
+                    <Box sx={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: "#1e293b", border: "1px solid #475569" }} />
+                    <Typography sx={{ color: "#94a3b8", fontSize: "0.8rem" }}>Remaining</Typography>
                   </Box>
                 </Box>
               </Paper>
