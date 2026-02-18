@@ -90,7 +90,6 @@ export default function Goals() {
       const targetAmount = parseFloat(target);
       const currentAmount = parseFloat(saved || 0);
       
-      // Calculate required monthly contribution
       const monthlyRate = parseFloat(expectedReturn) / 12 / 100;
       const fvCurrent = currentAmount * Math.pow(1 + monthlyRate, targetMonthsTotal);
       const remaining = targetAmount - fvCurrent;
@@ -126,7 +125,6 @@ export default function Goals() {
     }
   };
 
-  // Recalculate when user edits monthly contribution
   const recalculateWithNewContribution = () => {
     if (!tempPreSimContribution || !target) return;
 
@@ -138,7 +136,6 @@ export default function Goals() {
     const monthlyContribution = parseFloat(tempPreSimContribution);
     const monthlyRate = parseFloat(expectedReturn) / 12 / 100;
 
-    // Calculate future value with new contribution
     let fvCurrent, fvContributions, futureValue;
     
     if (monthlyRate === 0) {
@@ -184,10 +181,8 @@ export default function Goals() {
 
     setLoading(true);
     try {
-      // Use the suggested monthly contribution if simulation was run
       const monthlyContrib = preSimResult?.monthly_contribution || 0;
       
-      // Calculate target date based on years and months
       const totalMonths = (targetYears * 12) + targetMonths;
       const targetDate = new Date();
       targetDate.setMonth(targetDate.getMonth() + totalMonths);
@@ -197,11 +192,11 @@ export default function Goals() {
         goal_type: goalType,
         target_amount: parseFloat(target),
         saved_amount: parseFloat(saved) || 0,
-        target_date: targetDate.toISOString().split('T')[0], // Send only date part
+        target_date: targetDate.toISOString().split('T')[0],
         monthly_contribution: parseFloat(monthlyContrib) || 0,
       };
 
-      console.log("Sending payload:", payload); // Debug log
+      console.log("Sending payload:", payload);
 
       const response = await fetch(`${API_BASE}/goals`, {
         method: "POST",
@@ -225,7 +220,7 @@ export default function Goals() {
         alert("Goal created successfully!");
       } else {
         const error = await response.json();
-        console.error("Error response:", error); // Debug log
+        console.error("Error response:", error);
         alert(`Failed to create goal: ${JSON.stringify(error.detail || error)}`);
       }
     } catch (err) {
@@ -252,67 +247,64 @@ export default function Goals() {
   };
 
   const updateGoal = async (goalId) => {
-  if (!editingGoal) return;
+    if (!editingGoal) return;
 
-  setLoading(true);
-  try {
-    const response = await fetch(`${API_BASE}/goals/${goalId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    body: JSON.stringify({
-  title: editingGoal.title,
-  goal_type: editingGoal.goal_type,
-  target_amount: Number(editingGoal.target_amount),
-  saved_amount: Number(editingGoal.saved_amount),
-  target_date: editingGoal.target_date,
-  monthly_contribution: Number(editingGoal.monthly_contribution || 0),
-}),
-    });
-
-    if (!response.ok) {
-      const err = await response.json();
-      throw new Error(JSON.stringify(err));
-    }
-
-    setGoals((prev) =>
-  prev.map((g) =>
-    g.id === goalId
-      ? {
-          ...g,
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_BASE}/goals/${goalId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: editingGoal.title,
+          goal_type: editingGoal.goal_type,
           target_amount: Number(editingGoal.target_amount),
           saved_amount: Number(editingGoal.saved_amount),
-        }
-      : g
-  )
-);
+          target_date: editingGoal.target_date,
+          monthly_contribution: Number(editingGoal.monthly_contribution || 0),
+        }),
+      });
 
-setEditingGoal(null);
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(JSON.stringify(err));
+      }
 
-    alert("Goal updated successfully!");
-  } catch (err) {
-    console.error("Update error:", err);
-    alert("Failed to update goal");
-  } finally {
-    setLoading(false);
-  }
-};
+      setGoals((prev) =>
+        prev.map((g) =>
+          g.id === goalId
+            ? {
+                ...g,
+                target_amount: Number(editingGoal.target_amount),
+                saved_amount: Number(editingGoal.saved_amount),
+              }
+            : g
+        )
+      );
 
+      setEditingGoal(null);
+      alert("Goal updated successfully!");
+    } catch (err) {
+      console.error("Update error:", err);
+      alert("Failed to update goal");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const startEdit = (goal) => {
-  setEditingGoal({
-    id: goal.id,
-    title: goal.title,
-    goal_type: goal.goal_type,
-    target_amount: String(goal.target_amount),
-    saved_amount: String(goal.saved_amount),
-    target_date: goal.target_date,
-    monthly_contribution: goal.monthly_contribution ?? 0,
-  });
-};
-
+    setEditingGoal({
+      id: goal.id,
+      title: goal.title,
+      goal_type: goal.goal_type,
+      target_amount: String(goal.target_amount),
+      saved_amount: String(goal.saved_amount),
+      target_date: goal.target_date,
+      monthly_contribution: goal.monthly_contribution ?? 0,
+    });
+  };
 
   const cancelEdit = () => {
     setEditingGoal(null);
@@ -570,9 +562,23 @@ setEditingGoal(null);
                 </Typography>
                 <Box sx={{ display: "flex", justifyContent: "center" }}>
                   <PieChart
-                    series={[{ data: goalsChartData }]}
+                    series={[{
+                      data: goalsChartData,
+                      innerRadius: 50,
+                      outerRadius: 80,
+                      paddingAngle: 4,
+                      cornerRadius: 5,
+                      highlightScope: { faded: "global", highlighted: "item" },
+                    }]}
                     width={300}
-                    height={200}
+                    height={220}
+                    slotProps={{
+                      legend: {
+                        direction: "column",
+                        position: { vertical: "middle", horizontal: "right" },
+                        labelStyle: { fill: "#94a3b8", fontSize: 11 },
+                      },
+                    }}
                   />
                 </Box>
               </Paper>
@@ -583,16 +589,45 @@ setEditingGoal(null);
                 <Typography variant="h6" fontWeight={600} sx={{ mb: 2, color: "white" }}>
                   Overall Progress
                 </Typography>
-                <Box sx={{ display: "flex", justifyContent: "center" }}>
-                  <PieChart
-                    series={[{ 
-                      data: progressChartData,
-                      highlightScope: { faded: 'global', highlighted: 'item' },
-                    }]}
-                    width={300}
-                    height={200}
-                    colors={['#10b981', '#64748b']}
-                  />
+                <Box sx={{ display: "flex", justifyContent: "center", position: "relative", alignItems: "center" }}>
+                  <Box sx={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                    <PieChart
+                      series={[{
+                        data: progressChartData,
+                        innerRadius: 60,
+                        outerRadius: 85,
+                        paddingAngle: 5,
+                        cornerRadius: 6,
+                        highlightScope: { faded: "global", highlighted: "item" },
+                      }]}
+                      width={300}
+                      height={220}
+                      colors={["#10b981", "#1e293b"]}
+                      slotProps={{
+                        legend: {
+                          direction: "column",
+                          position: { vertical: "middle", horizontal: "right" },
+                          labelStyle: { fill: "#94a3b8", fontSize: 12 },
+                        },
+                      }}
+                    />
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        left: "36%",
+                        transform: "translateX(-50%)",
+                        textAlign: "center",
+                        pointerEvents: "none",
+                      }}
+                    >
+                      <Typography variant="h5" fontWeight={700} sx={{ color: "#10b981" }}>
+                        {overallProgress.toFixed(1)}%
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: "#94a3b8" }}>
+                        overall
+                      </Typography>
+                    </Box>
+                  </Box>
                 </Box>
               </Paper>
             </Grid>
@@ -681,17 +716,17 @@ setEditingGoal(null);
                           <Grid item xs={12}>
                             <Box sx={{ display: "flex", gap: 1 }}>
                               <Button
-                            variant="contained"
-                            onClick={() => updateGoal(goal.id)}
-                            disabled={
-                              loading ||
-                              !editingGoal?.target_amount ||
-                              Number(editingGoal.target_amount) <= 0
-                            }
-                            sx={{ backgroundColor: "#10b981", flex: 1 }}
-                          >
-                            {loading ? <CircularProgress size={20} /> : "Save"}
-                          </Button>
+                                variant="contained"
+                                onClick={() => updateGoal(goal.id)}
+                                disabled={
+                                  loading ||
+                                  !editingGoal?.target_amount ||
+                                  Number(editingGoal.target_amount) <= 0
+                                }
+                                sx={{ backgroundColor: "#10b981", flex: 1 }}
+                              >
+                                {loading ? <CircularProgress size={20} /> : "Save"}
+                              </Button>
                               <Button
                                 variant="outlined"
                                 onClick={cancelEdit}
@@ -785,19 +820,64 @@ setEditingGoal(null);
                             <Typography variant="body2" sx={{ color: "#94a3b8", mb: 0.5 }}>
                               Saved
                             </Typography>
-                            <Typography variant="h6" fontWeight={600} sx={{ color: "#10b981" }}>
+                            <Typography variant="h6" fontWeight={600} sx={{ color: "#10b981", mb: 1.5 }}>
                               ₹{goal.saved_amount.toLocaleString()}
                             </Typography>
+
+                            {/* Monthly Contribution Badge */}
+                            {goal.monthly_contribution > 0 && (
+                              <Box
+                                sx={{
+                                  mt: 1,
+                                  p: 1.2,
+                                  borderRadius: 2,
+                                  background: "linear-gradient(135deg, rgba(59,130,246,0.15) 0%, rgba(16,185,129,0.10) 100%)",
+                                  border: "1px solid rgba(59,130,246,0.3)",
+                                }}
+                              >
+                                <Typography variant="caption" sx={{ color: "#94a3b8", display: "block" }}>
+                                  Monthly Contribution
+                                </Typography>
+                                <Typography variant="body1" fontWeight={700} sx={{ color: "#60a5fa" }}>
+                                  ₹{goal.monthly_contribution.toLocaleString()}
+                                </Typography>
+                              </Box>
+                            )}
                           </Grid>
+
                           <Grid item xs={6}>
-                            <Box sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center", height: '100%' }}>
-                              <PieChart
-                                series={[{ data: goalPieData }]}
-                                width={150}
-                                height={150}
-                                colors={['#10b981', '#64748b']}
-                                margin={{ top: 0, bottom: 0, left: 0, right: 0 }}
-                              />
+                            <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "100%" }}>
+                              <Box sx={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                                <PieChart
+                                  series={[{
+                                    data: goalPieData,
+                                    innerRadius: 45,
+                                    outerRadius: 68,
+                                    paddingAngle: 3,
+                                    cornerRadius: 4,
+                                    highlightScope: { faded: "global", highlighted: "item" },
+                                  }]}
+                                  width={150}
+                                  height={150}
+                                  colors={["#10b981", "#1e293b"]}
+                                  margin={{ top: 0, bottom: 0, left: 0, right: 0 }}
+                                  slotProps={{ legend: { hidden: true } }}
+                                />
+                                <Box
+                                  sx={{
+                                    position: "absolute",
+                                    textAlign: "center",
+                                    pointerEvents: "none",
+                                  }}
+                                >
+                                  <Typography variant="caption" sx={{ color: "#94a3b8", fontSize: "0.6rem", display: "block" }}>
+                                    done
+                                  </Typography>
+                                  <Typography variant="body2" fontWeight={700} sx={{ color: "#10b981", fontSize: "0.8rem" }}>
+                                    {progress.toFixed(0)}%
+                                  </Typography>
+                                </Box>
+                              </Box>
                             </Box>
                           </Grid>
                         </Grid>
@@ -864,25 +944,11 @@ setEditingGoal(null);
                   ]}
                   sx={{
                     color: '#3b82f6',
-                    '& .MuiSlider-thumb': {
-                      backgroundColor: '#3b82f6',
-                      width: 20,
-                      height: 20,
-                    },
-                    '& .MuiSlider-track': {
-                      backgroundColor: '#3b82f6',
-                      height: 6,
-                    },
-                    '& .MuiSlider-rail': {
-                      backgroundColor: '#1e293b',
-                      height: 6,
-                    },
-                    '& .MuiSlider-mark': {
-                      backgroundColor: '#64748b',
-                    },
-                    '& .MuiSlider-markLabel': {
-                      color: '#94a3b8',
-                    },
+                    '& .MuiSlider-thumb': { backgroundColor: '#3b82f6', width: 20, height: 20 },
+                    '& .MuiSlider-track': { backgroundColor: '#3b82f6', height: 6 },
+                    '& .MuiSlider-rail': { backgroundColor: '#1e293b', height: 6 },
+                    '& .MuiSlider-mark': { backgroundColor: '#64748b' },
+                    '& .MuiSlider-markLabel': { color: '#94a3b8' },
                   }}
                 />
               </Paper>
@@ -913,25 +979,11 @@ setEditingGoal(null);
                   ]}
                   sx={{
                     color: '#10b981',
-                    '& .MuiSlider-thumb': {
-                      backgroundColor: '#10b981',
-                      width: 20,
-                      height: 20,
-                    },
-                    '& .MuiSlider-track': {
-                      backgroundColor: '#10b981',
-                      height: 6,
-                    },
-                    '& .MuiSlider-rail': {
-                      backgroundColor: '#1e293b',
-                      height: 6,
-                    },
-                    '& .MuiSlider-mark': {
-                      backgroundColor: '#64748b',
-                    },
-                    '& .MuiSlider-markLabel': {
-                      color: '#94a3b8',
-                    },
+                    '& .MuiSlider-thumb': { backgroundColor: '#10b981', width: 20, height: 20 },
+                    '& .MuiSlider-track': { backgroundColor: '#10b981', height: 6 },
+                    '& .MuiSlider-rail': { backgroundColor: '#1e293b', height: 6 },
+                    '& .MuiSlider-mark': { backgroundColor: '#64748b' },
+                    '& .MuiSlider-markLabel': { color: '#94a3b8' },
                   }}
                 />
               </Paper>
