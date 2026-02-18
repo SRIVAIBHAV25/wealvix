@@ -6,6 +6,8 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { PieChart } from '@mui/x-charts/PieChart';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import TrackChangesIcon from '@mui/icons-material/TrackChanges';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -29,6 +31,9 @@ export default function Dashboard() {
   const [simulationsOpen, setSimulationsOpen] = useState(false);
   const [recommendationsOpen, setRecommendationsOpen] = useState(false);
   const [reportsOpen, setReportsOpen] = useState(false);
+  const theme = useTheme();
+const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+const chartWidth = isMobile ? 280 : 400;
 
   const token = localStorage.getItem('token');
 
@@ -84,15 +89,31 @@ export default function Dashboard() {
 
   const { portfolio, goals } = summary;
 
-  const portfolioAllocationData = portfolio.holdings_count > 0 ? [
-    { id: 0, value: portfolio.total_investment, label: 'Invested', color: '#3b82f6' },
-    { id: 1, value: Math.max(0, portfolio.total_gain), label: 'Gains', color: '#10b981' },
-  ] : [];
+const portfolioAllocationData = portfolio.holdings_count > 0 ? (() => {
+  const invested = portfolio.total_investment;
+  const gain = portfolio.total_gain;
+  if (gain >= 0) {
+    return [
+      { id: 0, value: invested, label: 'Invested' },
+      { id: 1, value: gain, label: 'Gains' },
+    ];
+  } else {
+    // show loss separately
+    return [
+      { id: 0, value: portfolio.current_value, label: 'Current Value' },
+      { id: 1, value: Math.abs(gain), label: 'Unrealised Loss' },
+    ];
+  }
+})() : [];
 
-  const goalsData = goals.total > 0 ? [
-    { id: 0, value: goals.total_saved, label: 'Saved', color: '#10b981' },
-    { id: 1, value: Math.max(0, goals.total_target - goals.total_saved), label: 'Remaining', color: '#64748b' },
-  ] : [];
+const goalsData = goals.total > 0 ? (() => {
+  const saved = Math.max(0, goals.total_saved);
+  const remaining = Math.max(0, goals.total_target - goals.total_saved);
+  return [
+    { id: 0, value: saved, label: 'Saved' },
+    ...(remaining > 0 ? [{ id: 1, value: remaining, label: 'Remaining' }] : []),
+  ];
+})() : [];
 
  return (
   <Box sx={{ 
@@ -217,17 +238,18 @@ export default function Dashboard() {
             </Typography>
             {portfolioAllocationData.length > 0 ? (
               <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                <PieChart
-                  series={[{ data: portfolioAllocationData }]}
-                  width={window.innerWidth < 768 ? 300 : 400}
-                  height={300}
-                  margin={{ top: 0, bottom: 0, left: 0, right: 0 }}
-                  slotProps={{
-                    legend: {
-                      hidden: window.innerWidth < 768,
-                    }
-                  }}
-                />
+                   <PieChart
+                    series={[{
+                      data: portfolioAllocationData,
+                      cx: chartWidth / 2 - 10,
+                      cy: 140,
+                      outerRadius: 110,
+                      colorScale: ['#3b82f6', '#10b981'],
+                    }]}
+                    width={chartWidth}
+                    height={300}
+                    slotProps={{ legend: { hidden: isMobile } }}
+                  />
               </Box>
             ) : (
               <Box sx={{ textAlign: 'center', py: 8 }}>
@@ -251,17 +273,18 @@ export default function Dashboard() {
             </Typography>
             {goalsData.length > 0 ? (
               <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                <PieChart
-                  series={[{ data: goalsData }]}
-                  width={window.innerWidth < 768 ? 300 : 400}
-                  height={300}
-                  margin={{ top: 0, bottom: 0, left: 0, right: 0 }}
-                  slotProps={{
-                    legend: {
-                      hidden: window.innerWidth < 768,
-                    }
-                  }}
-                />
+                   <PieChart
+                    series={[{
+                      data: goalsData,
+                      cx: chartWidth / 2 - 10,
+                      cy: 140,
+                      outerRadius: 110,
+                      colorScale: ['#10b981', '#334155'],
+                    }]}
+                    width={chartWidth}
+                    height={300}
+                    slotProps={{ legend: { hidden: isMobile } }}
+                  />
               </Box>
             ) : (
               <Box sx={{ textAlign: 'center', py: 8 }}>
