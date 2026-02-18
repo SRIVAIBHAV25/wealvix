@@ -589,8 +589,8 @@ export default function Goals() {
                 <Typography variant="h6" fontWeight={600} sx={{ mb: 2, color: "white" }}>
                   Overall Progress
                 </Typography>
-                <Box sx={{ display: "flex", justifyContent: "center", position: "relative", alignItems: "center" }}>
-                  <Box sx={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                  <Box sx={{ position: "relative", width: 300, height: 220 }}>
                     <PieChart
                       series={[{
                         data: progressChartData,
@@ -598,6 +598,7 @@ export default function Goals() {
                         outerRadius: 85,
                         paddingAngle: 5,
                         cornerRadius: 6,
+                        cx: 100,
                         highlightScope: { faded: "global", highlighted: "item" },
                       }]}
                       width={300}
@@ -611,19 +612,21 @@ export default function Goals() {
                         },
                       }}
                     />
+                    {/* Center label absolutely positioned over the donut hole */}
                     <Box
                       sx={{
                         position: "absolute",
-                        left: "36%",
-                        transform: "translateX(-50%)",
+                        top: "50%",
+                        left: 100,
+                        transform: "translate(-50%, -50%)",
                         textAlign: "center",
                         pointerEvents: "none",
                       }}
                     >
-                      <Typography variant="h5" fontWeight={700} sx={{ color: "#10b981" }}>
+                      <Typography fontWeight={700} sx={{ color: "#10b981", fontSize: "1.5rem", lineHeight: 1.2 }}>
                         {overallProgress.toFixed(1)}%
                       </Typography>
-                      <Typography variant="caption" sx={{ color: "#94a3b8" }}>
+                      <Typography sx={{ color: "#94a3b8", fontSize: "0.7rem" }}>
                         overall
                       </Typography>
                     </Box>
@@ -861,7 +864,7 @@ export default function Goals() {
                                   height={150}
                                   colors={["#10b981", "#1e293b"]}
                                   margin={{ top: 0, bottom: 0, left: 0, right: 0 }}
-                                  slotProps={{ legend: { hidden: true } }}
+                                  slots={{ legend: () => null }}
                                 />
                                 <Box
                                   sx={{
