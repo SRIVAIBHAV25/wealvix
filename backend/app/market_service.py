@@ -1,7 +1,9 @@
 import yfinance as yf
+import pandas as pd
 from typing import Dict, List, Optional
 from datetime import datetime
 import logging
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -14,10 +16,8 @@ class MarketDataService:
         try:
             symbol = symbol.strip().upper()
 
-            # Try symbol as-is first
             data = yf.Ticker(symbol).history(period="5d")
 
-            # If empty and no suffix, fallback to NSE
             if data.empty and "." not in symbol:
                 symbol = f"{symbol}.NS"
                 data = yf.Ticker(symbol).history(period="5d")
@@ -38,40 +38,50 @@ class MarketDataService:
             return None
 
     @staticmethod
-def get_multiple_prices(symbols: List[str]) -> Dict[str, float]:
-    """Bulk download to avoid per-symbol rate limiting."""
-    import yfinance as yf
-    prices = {}
-    if not symbols:
-        return prices
+    def get_multiple_prices(symbols: List[str]) -> Dict[str, float]:
+        """Bulk download to avoid per-symbol rate limiting."""
+        prices = {}
+        if not symbols:
+            return prices
 
-    # Step 1: Bulk download
-    try:
-        df = yf.download(" ".join(symbols), period="5d", progress=False, auto_adjust=True, threads=True)
-        if not df.empty:
-            import pandas as pd
-            close = df["Close"] if not isinstance(df.columns, pd.MultiIndex) else df["Close"]
-            if isinstance(close, pd.Series):
-                # single symbol
-                val = close.dropna()
-                if not val.empty:
-                    prices[symbols[0]] = float(val.iloc[-1])
-            else:
-                for sym in symbols:
-                    if sym in close.columns:
-                        val = close[sym].dropna()
+        # Step 1: Bulk download all unique symbols at once
+        try:
+            df = yf.download(
+                " ".join(symbols),
+                period="5d",
+                progress=False,
+                auto_adjust=True,
+                threads=True,
+            )
+            if not df.empty:
+                close = df["Close"] if "Close" in df.columns else None
+                if close is not None:
+                    if isinstance(close, pd.Series):
+                        # Single symbol returned as Series
+                        val = close.dropna()
                         if not val.empty:
-                            prices[sym] = float(val.iloc[-1])
-    except Exception as e:
-        logger.warning(f"Bulk download failed: {e}")
+                            prices[symbols[0]] = float(val.iloc[-1])
+                    else:
+                        # Multiple symbols returned as DataFrame
+                        for sym in symbols:
+                            if sym in close.columns:
+                                val = close[sym].dropna()
+                                if not val.empty:
+                                    prices[sym] = float(val.iloc[-1])
+        except Exception as e:
+            logger.warning(f"Bulk download failed: {e}")
 
-    # Step 2: Individual fallback for any missing
-    for sym in [s for s in symbols if s not in prices]:
-        price = MarketDataService.get_current_price(sym)
-        if price:
-            prices[sym] = price
+        # Step 2: Individual fallback for anything still missing
+        for sym in [s for s in symbols if s not in prices]:
+            try:
+                price = MarketDataService.get_current_price(sym)
+                if price:
+                    prices[sym] = price
+                time.sleep(0.2)
+            except Exception as e:
+                logger.error(f"Individual fetch failed for {sym}: {e}")
 
-    return prices
+        return prices
 
     @staticmethod
     def get_market_data(symbol: str) -> Optional[Dict]:
@@ -81,7 +91,6 @@ def get_multiple_prices(symbols: List[str]) -> Dict[str, float]:
             ticker = yf.Ticker(symbol)
             history = ticker.history(period="5d")
 
-            # Fallback to NSE if empty
             if history.empty and "." not in symbol:
                 symbol = f"{symbol}.NS"
                 ticker = yf.Ticker(symbol)
@@ -120,38 +129,38 @@ def get_multiple_prices(symbols: List[str]) -> Dict[str, float]:
             return None
 
     @staticmethod
-def update_investment_prices(db, user_id: int = None):
-    """
-    Bulk-fetch prices so duplicate symbols (same stock, different avg prices)
-    are all updated in one API call instead of failing on rate limits.
-    """
-    from app.models import Investment
+    def update_investment_prices(db, user_id: int = None):
+        """
+        Bulk-fetch prices so duplicate symbols (same stock, different avg prices)
+        are all updated in one API call instead of failing on rate limits.
+        """
+        from app.models import Investment
 
-    query = db.query(Investment)
-    if user_id:
-        query = query.filter(Investment.user_id == user_id)
+        query = db.query(Investment)
+        if user_id:
+            query = query.filter(Investment.user_id == user_id)
 
-    investments = query.all()
-    if not investments:
-        return 0
+        investments = query.all()
+        if not investments:
+            return 0
 
-    # De-duplicate symbols for API call efficiency
-    unique_symbols = list(set(inv.symbol.strip().upper() for inv in investments))
-    prices = MarketDataService.get_multiple_prices(unique_symbols)
+        unique_symbols = list(set(inv.symbol.strip().upper() for inv in investments))
+        prices = MarketDataService.get_multiple_prices(unique_symbols)
 
-    updated_count = 0
-    now = datetime.utcnow()
-    for investment in investments:
-        key = investment.symbol.strip().upper()
-        if key in prices:
-            investment.last_price = prices[key]
-            investment.current_value = investment.units * prices[key]
-            investment.last_price_at = now
-            updated_count += 1
-        else:
-            logger.warning(f"No price found for: {investment.symbol}")
+        updated_count = 0
+        now = datetime.utcnow()
 
-    if updated_count > 0:
-        db.commit()
+        for investment in investments:
+            key = investment.symbol.strip().upper()
+            if key in prices:
+                investment.last_price = prices[key]
+                investment.current_value = investment.units * prices[key]
+                investment.last_price_at = now
+                updated_count += 1
+            else:
+                logger.warning(f"No price found for: {investment.symbol}")
 
-    return updated_count
+        if updated_count > 0:
+            db.commit()
+
+        return updated_count
